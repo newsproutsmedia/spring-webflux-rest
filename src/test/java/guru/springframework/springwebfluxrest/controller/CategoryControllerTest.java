@@ -41,7 +41,7 @@ public class CategoryControllerTest {
                 .willReturn(Flux.just(Category.builder().description("Cat1").build(),
                 Category.builder().description("Cat2").build()));
 
-        webTestClient.get().uri("/api/v1/categories/")
+        webTestClient.get().uri("/api/v1/categories")
                 .exchange()
                 .expectBodyList(Category.class)
                 .hasSize(2);
@@ -71,7 +71,7 @@ public class CategoryControllerTest {
         // using the POST method
         webTestClient.post()
                 // go to this url
-                .uri("/api/v1/categories/")
+                .uri("/api/v1/categories")
                 // expect the mock object to be of type Category
                 .body(catToSaveMono, Category.class)
                 // exchange the info
@@ -81,7 +81,7 @@ public class CategoryControllerTest {
     }
 
     @Test
-    public void TestUpdateCategory() {
+    public void testUpdateCategory() {
         BDDMockito.given(categoryRepository.save(any(Category.class)))
                 .willReturn(Mono.just(Category.builder().build()));
 
@@ -93,4 +93,6 @@ public class CategoryControllerTest {
                 .exchange()
                 .expectStatus().isOk();
     }
+
+
 }

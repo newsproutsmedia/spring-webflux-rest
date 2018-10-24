@@ -6,9 +6,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.BDDMockito;
 import org.mockito.Mockito;
+import org.reactivestreams.Publisher;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import static org.mockito.ArgumentMatchers.any;
 
 public class VendorControllerTest {
 
@@ -42,7 +45,7 @@ public class VendorControllerTest {
                                 .lastName("Suzy")
                                 .build()));
 
-        webTestClient.get().uri("/api/v1/vendors/")
+        webTestClient.get().uri("/api/v1/vendors")
                 .exchange()
                 .expectBodyList(Vendor.class)
                 .hasSize(2);
@@ -61,5 +64,33 @@ public class VendorControllerTest {
                 .exchange()
                 .expectBodyList(Vendor.class);
 
+    }
+
+    @Test
+    public void testCreateVendor(){
+        BDDMockito.given(vendorRepository.saveAll(any(Publisher.class)))
+                .willReturn(Flux.just(Vendor.builder().firstName("Barney").lastName("Rubble").build()));
+
+        Mono<Vendor> venToSaveMono = Mono.just(Vendor.builder().firstName("Fred").lastName("Flintstone").build());
+
+        webTestClient.post()
+                .uri("/api/v1/vendors")
+                .body(venToSaveMono, Vendor.class)
+                .exchange()
+                .expectStatus().isCreated();
+    }
+
+    @Test
+    public void testUpdateVendor() {
+        BDDMockito.given(vendorRepository.save(any(Vendor.class)))
+                .willReturn(Mono.just(Vendor.builder().build()));
+
+        Mono<Vendor> venToUpdateMono = Mono.just(Vendor.builder().firstName("Fred").lastName("Flintstone").build());
+
+        webTestClient.put()
+                .uri("/api/v1/vendors/someid")
+                .body(venToUpdateMono, Vendor.class)
+                .exchange()
+                .expectStatus().isOk();
     }
 }
